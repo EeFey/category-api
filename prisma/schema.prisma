@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  url      = env("DATABASE_URL")
+  provider = "postgresql"
+}
+
+model Category {
+  id        BigInt   @id @default(autoincrement())
+  name      String
+  parentId  BigInt?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent   Category?  @relation("CategoryLink", fields: [parentId], references: [id], onDelete: Cascade)
+  children Category[] @relation("CategoryLink")
+
+  ancestors   CategoryTree[] @relation("CategoryTreeDescendant")
+  descendants CategoryTree[] @relation("CategoryTreeAncestor")
+
+  categoryAttributes CategoryAttribute[]
+  products           Product[]
+
+  @@index([parentId])
+}
+
+model CategoryTree {
+  ancestorId   BigInt
+  descendantId BigInt
+  depth        Int
+
+  ancestor   Category @relation("CategoryTreeAncestor", fields: [ancestorId], references: [id], onDelete: Cascade)
+  descendant Category @relation("CategoryTreeDescendant", fields: [descendantId], references: [id], onDelete: Cascade)
+
+  @@id([ancestorId, descendantId])
+  @@index([ancestorId])
+  @@index([descendantId])
+}
+
+model Attribute {
+  id          BigInt   @id @default(autoincrement())
+  key         String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categoryAttributes     CategoryAttribute[]
+  productAttributeValues ProductAttributeValue[]
+
+  @@unique([key])
+}
+
+model CategoryAttribute {
+  id          BigInt   @id @default(autoincrement())
+  categoryId  BigInt
+  attributeId BigInt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category  Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  attribute Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, attributeId])
+  @@index([categoryId])
+  @@index([attributeId])
+}
+
+model Product {
+  id         BigInt   @id @default(autoincrement())
+  sku        String?  @unique
+  name       String
+  categoryId BigInt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  category   Category                @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  attributes ProductAttributeValue[]
+
+  @@index([categoryId])
+}
+
+model ProductAttributeValue {
+  id          BigInt   @id @default(autoincrement())
+  productId   BigInt
+  attributeId BigInt
+  value       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attribute Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
