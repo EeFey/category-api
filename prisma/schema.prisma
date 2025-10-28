@@ -13,6 +13,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AttributeType {
+  MULTISELECT
+  SHORTTEXT
+}
+
 model Category {
   id        BigInt   @id @default(autoincrement())
   name      String
@@ -50,11 +55,14 @@ model Attribute {
   key         String
   name        String
   description String?
+  type        AttributeType
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   categoryAttributes     CategoryAttribute[]
   productAttributeValues ProductAttributeValue[]
+  options                AttributeOption[]
 
   @@unique([key])
 }
@@ -91,13 +99,30 @@ model Product {
 model ProductAttributeValue {
   id          BigInt   @id @default(autoincrement())
   productId   BigInt
-  attributeId BigInt
-  value       String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  attributeId      BigInt
+  value            String?
+  attributeOptionId BigInt?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  attribute Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  product         Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attribute       Attribute        @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  attributeOption AttributeOption? @relation(fields: [attributeOptionId], references: [id], onDelete: Cascade)
 
   @@index([productId])
+  @@index([attributeOptionId])
+}
+
+model AttributeOption {
+  id        BigInt   @id @default(autoincrement())
+  value     String
+  attributeId BigInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attribute              Attribute                 @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  productAttributeValues ProductAttributeValue[]
+
+  @@unique([attributeId, value])
+  @@index([attributeId])
 }
