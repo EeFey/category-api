@@ -20,7 +20,7 @@ enum AttributeType {
 
 model Category {
   id        BigInt   @id @default(autoincrement())
-  name      String
+  name      String   @unique
   parentId  BigInt?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
