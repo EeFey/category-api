@@ -1,16 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Attribute, AttributeType } from '@prisma/client';
+import { Prisma, Attribute } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { GetAttributesDto } from './dto/get-attributes.dto';
-import { LinkType } from '../../common/types/attribute-link.type';
-
-interface AttributeQueryResult {
-  id: bigint;
-  key: string;
-  name: string;
-  type: AttributeType;
-  linkType: LinkType;
-}
+import { AttributeQueryResult } from './interfaces/attribute-query-result.interface';
 
 @Injectable()
 export class AttributesRepository {
