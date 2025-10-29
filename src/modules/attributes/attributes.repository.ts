@@ -16,9 +16,8 @@ interface AttributeQueryResult {
 export class AttributesRepository {
   constructor(private readonly prisma: PrismaService) { }
 
-  async countAttributes(where: Prisma.AttributeWhereInput): Promise<bigint> {
-    const count = await this.prisma.attribute.count({ where }); // use native bigint count when time comes
-    return BigInt(count);
+  async countAttributes(where: Prisma.AttributeWhereInput): Promise<number> {
+    return await this.prisma.attribute.count({ where });
   }
 
   async findManyAttributes(params: {
@@ -60,7 +59,7 @@ export class AttributesRepository {
    *
    * Returns { rows, total } where rows are the data page and total is matching count.
    */
-  async queryAttributesByCategoryIds(dto: GetAttributesDto): Promise<{ rows: AttributeQueryResult[]; total: bigint }> {
+  async queryAttributesByCategoryIds(dto: GetAttributesDto): Promise<{ rows: AttributeQueryResult[]; total: number }> {
     const {
       categoryIds,
       keyword,
@@ -99,7 +98,7 @@ export class AttributesRepository {
     // Build the two parameterized queries using the baseSql CTE
     const countSql = Prisma.sql`
       WITH "attributeLinks" AS (${baseSql})
-      SELECT COUNT(*)::BIGINT AS total
+      SELECT COUNT(*) AS total
       FROM "Attribute" a
       LEFT JOIN "attributeLinks" t ON t."attributeId" = a.id
       WHERE ${whereSql};
@@ -116,7 +115,7 @@ export class AttributesRepository {
     `;
 
     const totalRes = await this.prisma.$queryRaw(countSql) as Array<{ total: bigint }>;
-    const total = totalRes[0]?.total ?? 0n;
+    const total = Number(totalRes[0]?.total ?? 0);
 
     const rows = (await this.prisma.$queryRaw(dataSql)) as AttributeQueryResult[];
 

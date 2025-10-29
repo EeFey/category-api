@@ -32,17 +32,17 @@ describe('AttributesRepository (unit)', () => {
       };
 
 
-      (prisma.$queryRaw as jest.Mock).mockImplementationOnce(async () => [{ total: 2n }]);
+      (prisma.$queryRaw as jest.Mock).mockImplementationOnce(async () => [{ total: 2 }]);
       (prisma.$queryRaw as jest.Mock).mockImplementationOnce(async () => [
-        { id: 1n, key: 'color', name: 'Color', type: AttributeType.SHORTTEXT, link_type: 'direct' },
-        { id: 2n, key: 'size', name: 'Size', type: AttributeType.SHORTTEXT, link_type: 'inherited' },
+        { id: 1n, key: 'color', name: 'Color', type: AttributeType.SHORTTEXT, linkType: 'direct' },
+        { id: 2n, key: 'size', name: 'Size', type: AttributeType.SHORTTEXT, linkType: 'inherited' },
       ]);
 
       const result = await repo.queryAttributesByCategoryIds(dto);
-      expect(result.total).toBe(2n);
+      expect(result.total).toBe(2);
       expect(result.rows.length).toBe(2);
       expect(result.rows[0].key).toBe('color');
-      expect(result.rows[0].link_type).toBe('direct');
+      expect(result.rows[0].linkType).toBe('direct');
       expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
     });
 
@@ -58,13 +58,13 @@ describe('AttributesRepository (unit)', () => {
         sortOrder: 'desc',
       };
 
-      (prisma.$queryRaw as jest.Mock).mockImplementationOnce(async () => [{ total: 1n }]);
+      (prisma.$queryRaw as jest.Mock).mockImplementationOnce(async () => [{ total: 1 }]);
       (prisma.$queryRaw as jest.Mock).mockImplementationOnce(async () => [
-        { id: 3n, key: 'material', name: 'Material', type: AttributeType.SHORTTEXT, link_type: 'inherited' },
+        { id: 3n, key: 'material', name: 'Material', type: AttributeType.SHORTTEXT, linkType: 'inherited' },
       ]);
 
       const res = await repo.queryAttributesByCategoryIds(dto);
-      expect(res.total).toBe(1n);
+      expect(res.total).toBe(1);
       expect(res.rows[0].name).toBe('Material');
       expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
     });

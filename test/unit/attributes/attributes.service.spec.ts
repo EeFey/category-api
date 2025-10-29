@@ -30,7 +30,7 @@ describe('AttributesService (unit)', () => {
 
   it('returns all attributes when no categoryIds', async () => {
     const dto: GetAttributesDto = { categoryIds: [], page: 1, limit: 10 };
-    (attributesRepo.countAttributes as jest.Mock).mockResolvedValue(2n);
+    (attributesRepo.countAttributes as jest.Mock).mockResolvedValue(2);
     (attributesRepo.findManyAttributes as jest.Mock).mockResolvedValue([
       { id: 1n, key: 'a1', name: 'A 1', type: AttributeType.SHORTTEXT },
       { id: 2n, key: 'a2', name: 'A 2', type: AttributeType.SHORTTEXT },
@@ -50,7 +50,7 @@ describe('AttributesService (unit)', () => {
     (categoriesRepo.findExistingCategoryIds as jest.Mock).mockResolvedValue([1n]);
     (attributesRepo.queryAttributesByCategoryIds as jest.Mock).mockResolvedValue({
       rows: [{ id: 3n, key: 'color', name: 'Color',  type: AttributeType.SHORTTEXT, linkType: 'direct' }],
-      total: 1n,
+      total: 1,
     });
 
     const res = await service.getAttributes(dto);
