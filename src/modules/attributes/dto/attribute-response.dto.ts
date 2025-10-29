@@ -1,7 +1,6 @@
 import { AttributeType } from '@prisma/client';
 import { Transform, Expose } from 'class-transformer';
-
-export type LinkType = 'direct' | 'inherited' | 'global' | null;
+import type { LinkType } from '../../../common/types/attribute-link.type';
 
 export class AttributeResponseDto {
   @Expose()

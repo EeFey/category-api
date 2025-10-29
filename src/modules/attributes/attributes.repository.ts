@@ -1,7 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Attribute, AttributeType } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { GetAttributesDto } from './dto/get-attributes.dto';
+import { LinkType } from '../../common/types/attribute-link.type';
+
+interface AttributeQueryResult {
+  id: bigint;
+  key: string;
+  name: string;
+  type: AttributeType;
+  linkType: LinkType;
+}
 
 @Injectable()
 export class AttributesRepository {
@@ -17,7 +26,7 @@ export class AttributesRepository {
     limit?: number;
     where?: Prisma.AttributeWhereInput;
     orderBy?: Prisma.AttributeOrderByWithRelationInput;
-  }) {
+  }): Promise<Attribute[]> {
     const { offset, limit, where, orderBy } = params;
     return this.prisma.attribute.findMany({
       skip: offset,
@@ -51,7 +60,7 @@ export class AttributesRepository {
    *
    * Returns { rows, total } where rows are the data page and total is matching count.
    */
-  async queryAttributesByCategoryIds(dto: GetAttributesDto): Promise<{ rows: any[]; total: bigint }> {
+  async queryAttributesByCategoryIds(dto: GetAttributesDto): Promise<{ rows: AttributeQueryResult[]; total: bigint }> {
     const {
       categoryIds,
       keyword,
@@ -109,7 +118,7 @@ export class AttributesRepository {
     const totalRes = await this.prisma.$queryRaw(countSql) as Array<{ total: bigint }>;
     const total = totalRes[0]?.total ?? 0n;
 
-    const rows = (await this.prisma.$queryRaw(dataSql)) as any[];
+    const rows = (await this.prisma.$queryRaw(dataSql)) as AttributeQueryResult[];
 
     return { rows, total };
   }

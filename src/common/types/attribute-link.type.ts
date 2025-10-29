@@ -1,0 +1,1 @@
+export type LinkType = 'direct' | 'inherited' | 'global' | null;
