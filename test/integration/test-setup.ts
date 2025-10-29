@@ -13,9 +13,7 @@ export async function setupIntegrationTest(
 
   const app = moduleFixture.createNestApplication();
   app.useGlobalPipes(new ValidationPipe({
-    transform: true, whitelist: true, transformOptions: {
-      enableImplicitConversion: true,
-    },
+    transform: true, whitelist: true
   }));
   await app.init();
 

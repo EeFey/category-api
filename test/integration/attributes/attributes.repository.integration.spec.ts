@@ -44,16 +44,16 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     ['battery_capacity', 'camera_megapixels', 'os_version'].forEach((key) => {
       const attribute = res.rows.find((r) => r.key === key);
       expect(attribute).toBeDefined();
-      expect(attribute.linkType).toBe('direct');
+      expect(attribute!.linkType).toBe('direct');
     });
 
     const model = res.rows.find((r) => r.key === 'model');
     expect(model).toBeDefined();
-    expect(model.linkType).toBe('inherited');
+    expect(model!.linkType).toBe('inherited');
 
     const brand = res.rows.find((r) => r.key === 'brand');
     expect(brand).toBeDefined();
-    expect(brand.linkType).toBe('global');
+    expect(brand!.linkType).toBe('global');
 
     expect(res.rows.find((r) => r.key === 'gpu_model')).toBeUndefined();
   });
@@ -70,30 +70,33 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     // Direct (phones)
     const battery = res.rows.find((r) => r.key === 'battery_capacity');
     expect(battery).toBeDefined();
-    expect(battery.linkType).toBe('direct');
+    expect(battery!.linkType).toBe('direct');
 
     // Direct (laptops)
     const ram = res.rows.find((r) => r.key === 'ram_size');
     expect(ram).toBeDefined();
-    expect(ram.linkType).toBe('direct');
+    expect(ram!.linkType).toBe('direct');
 
     // Inherited
     const model = res.rows.find((r) => r.key === 'model');
     expect(model).toBeDefined();
-    expect(model.linkType).toBe('inherited');
+    expect(model!.linkType).toBe('inherited');
 
     // Global
     const brand = res.rows.find((r) => r.key === 'brand');
     expect(brand).toBeDefined();
-    expect(brand.linkType).toBe('global');
+    expect(brand!.linkType).toBe('global');
 
     // Not applicable
     const gpu = res.rows.find((r) => r.key === 'gpu_model');
     expect(gpu).toBeUndefined();
+
+    // Check for duplicates
+    const unique = new Set(res.rows.map((r) => r.key));
+    expect(unique.size).toBe(res.rows.length);
   });
 
   it('should filter attributes by keyword and support pagination', async () => {
-    // keyword filter
     const dtoKeyword: GetAttributesDto = {
       categoryIds: [phones.id],
       keyword: 'batt',
@@ -116,6 +119,20 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
 
     const r2 = await attributesRepository.queryAttributesByCategoryIds(dtoPaginate);
     expect(r2.rows.length).toBeLessThanOrEqual(1);
+  });
+
+  it('should return no rows for a keyword that matches nothing', async () => {
+    const dto: GetAttributesDto = {
+      categoryIds: [phones.id],
+      keyword: 'thiskeyworddoesnotexist',
+      page: 1,
+      limit: 10,
+    };
+
+    const res = await attributesRepository.queryAttributesByCategoryIds(dto);
+    expect(Array.isArray(res.rows)).toBe(true);
+    expect(res.rows.length).toBe(0);
+    expect(res.total).toBe(0);
   });
 
   it('should filter attributes by link type (direct only)', async () => {
@@ -204,7 +221,6 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     expect(res.rows).toHaveLength(0);
     expect(res.total).toBeGreaterThan(0);
   });
-
 });
 
 
@@ -274,5 +290,4 @@ describe('AttributesRepository.buildAttributeLinksBaseSql (integration)', () => 
     expect(gpuModel).toBeDefined();
     expect(gpuModel.linkType).toBeNull();
   });
-
 });
