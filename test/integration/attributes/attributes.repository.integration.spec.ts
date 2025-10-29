@@ -22,9 +22,9 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     attributesRepository = moduleFixture.get(AttributesRepository);
 
     [electronics, laptops, phones] = await Promise.all([
-      prisma.category.findUniqueOrThrow({ where: { name: 'Electronics' } }),
-      prisma.category.findUniqueOrThrow({ where: { name: 'Laptops' } }),
-      prisma.category.findUniqueOrThrow({ where: { name: 'Mobile Phones' } }),
+      prisma.category.findUniqueOrThrow({ where: { key: 'electronics' } }),
+      prisma.category.findUniqueOrThrow({ where: { key: 'laptops' } }),
+      prisma.category.findUniqueOrThrow({ where: { key: 'mobile_phones' } }),
     ]);
   });
 
@@ -223,7 +223,7 @@ describe('AttributesRepository.buildAttributeLinksBaseSql (integration)', () => 
     prisma = setup.prismaService;
     attributesRepository = moduleFixture.get(AttributesRepository);
 
-    phones = await prisma.category.findUniqueOrThrow({ where: { name: 'Mobile Phones' } });
+    phones = await prisma.category.findUniqueOrThrow({ where: { key: 'mobile_phones' } });
     brandAttr = await prisma.attribute.findUniqueOrThrow({ where: { key: 'brand' } });
     modelAttr = await prisma.attribute.findUniqueOrThrow({ where: { key: 'model' } });
     batteryCapacityAttr = await prisma.attribute.findUniqueOrThrow({ where: { key: 'battery_capacity' } });

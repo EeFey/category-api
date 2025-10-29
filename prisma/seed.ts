@@ -7,31 +7,31 @@ export async function main() {
   // Create Categories
   // --------------------------------------------------------------------------
   const electronics = await prisma.category.create({
-    data: { name: 'Electronics' },
+    data: { key: 'electronics', name: 'Electronics' },
   });
 
   const phones = await prisma.category.create({
-    data: { name: 'Mobile Phones', parentId: electronics.id },
+    data: { key: 'mobile_phones', name: 'Mobile Phones', parentId: electronics.id },
   });
 
   const laptops = await prisma.category.create({
-    data: { name: 'Laptops', parentId: electronics.id },
+    data: { key: 'laptops', name: 'Laptops', parentId: electronics.id },
   });
 
   const androidPhones = await prisma.category.create({
-    data: { name: 'Android Phones', parentId: phones.id },
+    data: { key: 'android_phones', name: 'Android Phones', parentId: phones.id },
   });
 
   const iphones = await prisma.category.create({
-    data: { name: 'iPhones', parentId: phones.id },
+    data: { key: 'iphones', name: 'iPhones', parentId: phones.id },
   });
 
   const gamingLaptops = await prisma.category.create({
-    data: { name: 'Gaming Laptops', parentId: laptops.id },
+    data: { key: 'gaming_laptops', name: 'Gaming Laptops', parentId: laptops.id },
   });
 
   const businessLaptops = await prisma.category.create({
-    data: { name: 'Business Laptops', parentId: laptops.id },
+    data: { key: 'business_laptops', name: 'Business Laptops', parentId: laptops.id },
   });
 
   // --------------------------------------------------------------------------

@@ -22,10 +22,10 @@ describe('AttributesController (integration)', () => {
     prisma = setup.prismaService;
 
     [gamingLaptops, iphones, laptops, phones] = await Promise.all([
-      prisma.category.findUniqueOrThrow({ where: { name: 'Gaming Laptops' } }),
-      prisma.category.findUniqueOrThrow({ where: { name: 'iPhones' } }),
-      prisma.category.findUniqueOrThrow({ where: { name: 'Laptops' } }),
-      prisma.category.findUniqueOrThrow({ where: { name: 'Mobile Phones' } }),
+      prisma.category.findUniqueOrThrow({ where: { key: 'gaming_laptops' } }),
+      prisma.category.findUniqueOrThrow({ where: { key: 'iphones' } }),
+      prisma.category.findUniqueOrThrow({ where: { key: 'laptops' } }),
+      prisma.category.findUniqueOrThrow({ where: { key: 'mobile_phones' } }),
     ]);
   });
 
