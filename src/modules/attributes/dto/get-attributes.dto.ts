@@ -31,7 +31,7 @@ export class GetAttributesDto extends PaginationDto {
   linkTypes?: LinkType[];
 
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => value === 'true' ? true : false)
   notApplicable?: boolean;
 
   @IsOptional()

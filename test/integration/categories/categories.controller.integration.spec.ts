@@ -2,6 +2,7 @@ import { TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../../src/app.module';
+import { CategoriesService } from '../../../src/modules/categories/categories.service';
 import { PrismaService } from '../../../src/common/prisma/prisma.service';
 import { setupIntegrationTest, tearDownIntegrationTest } from '../test-setup';
 
@@ -69,6 +70,47 @@ describe('CategoriesController (integration)', () => {
       const node = res.body[0];
       expect(node.attributeCount).toBeUndefined();
       expect(node.productCount).toBeUndefined();
+    });
+
+    describe('DTO transformation', () => {
+      let service: CategoriesService;
+
+      beforeAll(async () => {
+        service = moduleFixture.get<CategoriesService>(CategoriesService);
+      });
+
+      it('should transform includeCounts=true to a boolean', async () => {
+        const getCategoryTreeSpy = jest.spyOn(service, 'getCategoryTree').mockResolvedValueOnce([]);
+
+        await request(app.getHttpServer())
+          .get('/api/categories/tree?includeCounts=true')
+          .expect(200);
+
+        expect(getCategoryTreeSpy).toHaveBeenCalledWith(true);
+        getCategoryTreeSpy.mockRestore();
+      });
+
+      it('should transform includeCounts=false to a boolean', async () => {
+        const getCategoryTreeSpy = jest.spyOn(service, 'getCategoryTree').mockResolvedValueOnce([]);
+
+        await request(app.getHttpServer())
+          .get('/api/categories/tree?includeCounts=false')
+          .expect(200);
+
+        expect(getCategoryTreeSpy).toHaveBeenCalledWith(false);
+        getCategoryTreeSpy.mockRestore();
+      });
+
+      it('should default includeCounts to false when not provided', async () => {
+        const getCategoryTreeSpy = jest.spyOn(service, 'getCategoryTree').mockResolvedValueOnce([]);
+
+        await request(app.getHttpServer())
+          .get('/api/categories/tree')
+          .expect(200);
+
+        expect(getCategoryTreeSpy).toHaveBeenCalledWith(false);
+        getCategoryTreeSpy.mockRestore();
+      });
     });
   });
 });

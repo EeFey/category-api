@@ -26,7 +26,7 @@ describe('AttributesRepository (unit)', () => {
       const dto: GetAttributesDto = {
         categoryIds: [10n],
         page: 1,
-        limit: 10,
+        limit: 5,
         sortBy: 'name',
         sortOrder: 'asc',
       };

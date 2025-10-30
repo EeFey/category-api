@@ -37,7 +37,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     const dto: GetAttributesDto = {
       categoryIds: [phones.id],
       page: 1,
-      limit: 50,
+      limit: 5,
     };
 
     const res = await attributesRepository.queryAttributesByCategoryIds(dto);
@@ -63,7 +63,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     const dto: GetAttributesDto = {
       categoryIds: [phones.id, laptops.id],
       page: 1,
-      limit: 50,
+      limit: 10,
     };
 
     const res = await attributesRepository.queryAttributesByCategoryIds(dto);
@@ -102,7 +102,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
       categoryIds: [phones.id],
       keyword: 'batt',
       page: 1,
-      limit: 10,
+      limit: 5,
     };
 
     const r1 = await attributesRepository.queryAttributesByCategoryIds(dtoKeyword);
@@ -127,7 +127,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
       categoryIds: [phones.id],
       keyword: 'thiskeyworddoesnotexist',
       page: 1,
-      limit: 10,
+      limit: 5,
     };
 
     const res = await attributesRepository.queryAttributesByCategoryIds(dto);
@@ -141,7 +141,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
       categoryIds: [laptops.id],
       linkTypes: ['direct'],
       page: 1,
-      limit: 50,
+      limit: 5,
     };
 
     const res = await attributesRepository.queryAttributesByCategoryIds(dto);
@@ -157,7 +157,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
       categoryIds: [laptops.id],
       linkTypes: ['direct', 'global'],
       page: 1,
-      limit: 50,
+      limit: 5,
     };
 
     const res = await attributesRepository.queryAttributesByCategoryIds(dto);
@@ -172,7 +172,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
       categoryIds: [electronics.id],
       notApplicable: true,
       page: 1,
-      limit: 50,
+      limit: 5,
     };
 
     const res = await attributesRepository.queryAttributesByCategoryIds(dto);
@@ -187,7 +187,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
       sortBy: 'key',
       sortOrder: 'asc',
       page: 1,
-      limit: 10,
+      limit: 5,
     };
 
     const res = await attributesRepository.queryAttributesByCategoryIds(dto);
@@ -201,7 +201,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
       sortBy: 'key',
       sortOrder: 'desc',
       page: 1,
-      limit: 50,
+      limit: 5,
     };
 
     const res = await attributesRepository.queryAttributesByCategoryIds(dto);
@@ -215,7 +215,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     const dto: GetAttributesDto = {
       categoryIds: [phones.id],
       page: 9999,
-      limit: 10,
+      limit: 5,
     };
 
     const res = await attributesRepository.queryAttributesByCategoryIds(dto);
@@ -227,7 +227,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     const dtoGamingLaptops: GetAttributesDto = {
       categoryIds: [gamingLaptops.id],
       page: 1,
-      limit: 50,
+      limit: 5,
     };
 
     const resGamingLaptops = await attributesRepository.queryAttributesByCategoryIds(dtoGamingLaptops);
@@ -237,7 +237,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     const dtoCombined: GetAttributesDto = {
       categoryIds: [laptops.id, gamingLaptops.id],
       page: 1,
-      limit: 50,
+      limit: 5,
     };
 
     const resCombined = await attributesRepository.queryAttributesByCategoryIds(dtoCombined);

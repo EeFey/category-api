@@ -2,9 +2,9 @@ import { TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../../src/app.module';
+import { AttributesService } from '../../../src/modules/attributes/attributes.service';
 import { PrismaService } from '../../../src/common/prisma/prisma.service';
 import { setupIntegrationTest, tearDownIntegrationTest } from '../test-setup';
-import { Category } from '@prisma/client';
 
 describe('AttributesController (integration)', () => {
   let app: INestApplication;
@@ -37,6 +37,7 @@ describe('AttributesController (integration)', () => {
         expect(attr).toHaveProperty('key');
         expect(attr).toHaveProperty('name');
         expect(attr).toHaveProperty('type');
+        expect(attr).toHaveProperty('linkType');
       }
     });
 
@@ -127,6 +128,176 @@ describe('AttributesController (integration)', () => {
         .expect((res) => {
           expect(res.body.message).toBeDefined();
         });
+    });
+  });
+
+  describe('DTO transformation', () => {
+    let service: AttributesService;
+
+    beforeAll(async () => {
+      service = moduleFixture.get<AttributesService>(AttributesService);
+    });
+
+    it('should transform categoryIds into an array of bigints', async () => {
+      const getAttributesSpy = jest.spyOn(service, 'getAttributes').mockResolvedValueOnce({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 5,
+      });
+
+      await request(app.getHttpServer())
+        .get('/api/attributes?categoryIds=1&categoryIds=23')
+        .expect(200);
+
+      expect(getAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categoryIds: [1n, 23n],
+        }),
+      );
+      getAttributesSpy.mockRestore();
+    });
+
+    it('should transform notApplicable=true to a boolean', async () => {
+      const getAttributesSpy = jest.spyOn(service, 'getAttributes').mockResolvedValueOnce({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 5,
+      });
+
+      await request(app.getHttpServer())
+        .get('/api/attributes?categoryIds=1&notApplicable=true')
+        .expect(200);
+
+      expect(getAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          notApplicable: true,
+        }),
+      );
+      getAttributesSpy.mockRestore();
+    });
+
+    it('should transform notApplicable=false to a boolean', async () => {
+      const getAttributesSpy = jest.spyOn(service, 'getAttributes').mockResolvedValueOnce({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 5,
+      });
+
+      await request(app.getHttpServer())
+        .get('/api/attributes?categoryIds=1&notApplicable=false')
+        .expect(200);
+
+      expect(getAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          notApplicable: false,
+        }),
+      );
+      getAttributesSpy.mockRestore();
+    });
+
+    it('should transform a single categoryId into an array of one bigint', async () => {
+      const getAttributesSpy = jest.spyOn(service, 'getAttributes').mockResolvedValueOnce({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 5,
+      });
+
+      await request(app.getHttpServer())
+        .get('/api/attributes?categoryIds=5')
+        .expect(200);
+
+      expect(getAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categoryIds: [5n],
+        }),
+      );
+      getAttributesSpy.mockRestore();
+    });
+
+    it('should trim the keyword parameter', async () => {
+      const getAttributesSpy = jest.spyOn(service, 'getAttributes').mockResolvedValueOnce({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 5,
+      });
+
+      await request(app.getHttpServer())
+        .get('/api/attributes?keyword=  test  ')
+        .expect(200);
+
+      expect(getAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          keyword: 'test',
+        }),
+      );
+      getAttributesSpy.mockRestore();
+    });
+
+    it('should transform linkTypes into an array', async () => {
+      const getAttributesSpy = jest.spyOn(service, 'getAttributes').mockResolvedValueOnce({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 5,
+      });
+
+      await request(app.getHttpServer())
+        .get('/api/attributes?categoryIds=1&linkTypes=direct&linkTypes=inherited')
+        .expect(200);
+
+      expect(getAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          linkTypes: ['direct', 'inherited'],
+        }),
+      );
+      getAttributesSpy.mockRestore();
+    });
+
+    it('should use default sortBy and sortOrder when not provided', async () => {
+      const getAttributesSpy = jest.spyOn(service, 'getAttributes').mockResolvedValueOnce({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 5,
+      });
+
+      await request(app.getHttpServer())
+        .get('/api/attributes')
+        .expect(200);
+
+      expect(getAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortBy: 'name',
+          sortOrder: 'asc',
+        }),
+      );
+      getAttributesSpy.mockRestore();
+    });
+
+    it('should use provided sortBy and sortOrder', async () => {
+      const getAttributesSpy = jest.spyOn(service, 'getAttributes').mockResolvedValueOnce({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 5,
+      });
+
+      await request(app.getHttpServer())
+        .get('/api/attributes?sortBy=key&sortOrder=desc')
+        .expect(200);
+
+      expect(getAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortBy: 'key',
+          sortOrder: 'desc',
+        }),
+      );
+      getAttributesSpy.mockRestore();
     });
   });
 });

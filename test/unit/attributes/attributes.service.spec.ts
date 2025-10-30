@@ -29,7 +29,7 @@ describe('AttributesService (unit)', () => {
   });
 
   it('returns all attributes when no categoryIds', async () => {
-    const dto: GetAttributesDto = { categoryIds: [], page: 1, limit: 10 };
+    const dto: GetAttributesDto = { categoryIds: [], page: 1, limit: 5 };
     (attributesRepo.countAttributes as jest.Mock).mockResolvedValue(2);
     (attributesRepo.findManyAttributes as jest.Mock).mockResolvedValue([
       { id: 1n, key: 'a1', name: 'A 1', type: AttributeType.SHORTTEXT },
@@ -45,7 +45,7 @@ describe('AttributesService (unit)', () => {
   });
 
   it('calls repository for category attributes', async () => {
-    const dto: GetAttributesDto = { categoryIds: [1n], page: 1, limit: 20, sortBy: 'name', sortOrder: 'asc' };
+    const dto: GetAttributesDto = { categoryIds: [1n], page: 1, limit: 5, sortBy: 'name', sortOrder: 'asc' };
 
     (categoriesRepo.findExistingCategoryIds as jest.Mock).mockResolvedValue([1n]);
     (attributesRepo.queryAttributesByCategoryIds as jest.Mock).mockResolvedValue({
@@ -62,7 +62,7 @@ describe('AttributesService (unit)', () => {
   });
 
   it('throws BadRequestException if linkTypes are provided without categoryIds', async () => {
-    const dto: GetAttributesDto = { linkTypes: ['direct'], page: 1, limit: 10 };
+    const dto: GetAttributesDto = { linkTypes: ['direct'], page: 1, limit: 5 };
 
     await expect(service.getAttributes(dto)).rejects.toThrow(
       new BadRequestException('linkTypes require at least one categoryId'),
@@ -70,7 +70,7 @@ describe('AttributesService (unit)', () => {
   });
 
   it('throws BadRequestException if notApplicable is provided without categoryIds', async () => {
-    const dto: GetAttributesDto = { notApplicable: true, page: 1, limit: 10 };
+    const dto: GetAttributesDto = { notApplicable: true, page: 1, limit: 5 };
 
     await expect(service.getAttributes(dto)).rejects.toThrow(
       new BadRequestException('notApplicable requires at least one categoryId'),
@@ -83,7 +83,7 @@ describe('AttributesService (unit)', () => {
       linkTypes: ['direct'],
       notApplicable: true,
       page: 1,
-      limit: 10,
+      limit: 5,
     };
 
     (categoriesRepo.findExistingCategoryIds as jest.Mock).mockResolvedValue([1n]);
@@ -94,7 +94,7 @@ describe('AttributesService (unit)', () => {
   });
 
   it('throws BadRequestException if any categoryId does not exist', async () => {
-    const dto: GetAttributesDto = { categoryIds: [1n, 2n], page: 1, limit: 10 };
+    const dto: GetAttributesDto = { categoryIds: [1n, 2n], page: 1, limit: 5 };
 
     (categoriesRepo.findExistingCategoryIds as jest.Mock).mockResolvedValue([1n]);
 
