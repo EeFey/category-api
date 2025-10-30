@@ -1,98 +1,46 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+### Setup
+1. Get app and postgres running ```docker compose up -d```
+2. Apply database migration ```npx prisma migrate deploy```
+3. Seed the database ```npm run seed```
+4. Webserver available at ```localhost:3000```
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### Tests
+- Unit tests: ```npm run test```
+- Integration tests: ```npm run test:integration```
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+### Endpoints
+- ```/api/attributes```
+  - Get a paginated list of attributes.
+  - **Query Parameters:**
+    | Name | Type | Description | Default |
+    | --- | --- | --- | --- |
+    | `keyword` | string | The keyword to search for in attribute names and keys. | |
+    | `categoryIds` | bigint | Filter attributes by category IDs. Pass multiple values by repeating the key, e.g., `categoryIds=1&categoryIds=2`. | |
+    | `linkTypes` | 'direct' \| 'inherited' \| 'global' | Filter attributes by link types. Pass multiple values by repeating the key, e.g., `linkTypes=direct&linkTypes=inherited`. | |
+    | `notApplicable` | boolean | Show only attributes that are not applicable. | |
+    | `sortBy` | 'id' \| 'name' \| 'key' \| 'createdAt' \| 'updatedAt' | The field to sort the attributes by. | 'name' |
+    | `sortOrder` | 'asc' \| 'desc' | The order to sort the attributes in. | 'asc' |
+    | `page` | number | The page number for pagination. | 1 |
+    | `limit` | number | The number of items per page for pagination. | 10 |
+- ```/api/categories/tree```
+  - Get the category tree structure.
+  - **Query Parameters:**
+    | Name | Type | Description | Default |
+    | --- | --- | --- | --- |
+    | `includeCounts` | boolean | Whether to include the count of attributes for each category. | false |
+- ```/metrics```
+- ```/health```
+- ```/ready```
 
-## Description
+### Examples
+- ```localhost:3000/api/attributes?categoryIds=1&categoryIds=2&linkTypes=direct&linkTypes=inherited&notApplicable=false&keyword=os&sortBy=key&sortOrder=desc&page=1&limit=5```
+- ```localhost:3000/api/categories/tree?includeCounts=true```
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Performance & Scalability - handling 10x scale (10M+ products)
+1. The ```CategoryTree``` table has been added for fast lookups of relationships between categories. It should be maintained during category insert/update/delete
+2. A more immediate improvement would be to create an ```AttributeLink``` table (defined in ```buildAttributeLinksBaseSql```), it stores the relationship between attributes and their corresponding linkType from the perspective of selected categories. This table should be updated whenever attributes or category-attribute relationship change. A materialized view approach could also be considered if immediate visibility of changes of attributes isn't required
+3. The ```/api/categories/tree``` endpoint essentially returns the same data for all users. The complete response including counts could be cached in Redis for fast retrieval. The cache can be invalidated when attributes or categories are modified, and it should have a reasonable TTL. At the scale of 10M+ products and in the context of this category tree, I assume it does not require real-time accuracy of product counts, so a TTL from an hour to a day would work
+4. Investigate query performance and implement index based on query plans
+5. If attribute keyword search performance becomes a bottleneck, an inverted index could be added, like postgres GIN on ```Attribute``` table
+6. Monitor webserver and database performance. I expect database to reach resource limit first, in which vertically scaling with more CPU or RAM should be considered. If the webserver becomes a bottleneck, horizontal scaling across multiple instances can help to handle higher request throughput 
 
-## Project setup
-
-```bash
-$ npm install
-```
-
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
