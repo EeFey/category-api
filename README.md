@@ -1,8 +1,9 @@
 ### Setup
 1. Get app and postgres running ```docker compose up -d```
-2. Apply database migration ```npx prisma migrate deploy```
-3. Seed the database ```npm run seed```
-4. Webserver available at ```localhost:3000```
+2. Install dependencies ```npm install```
+3. Apply database migration ```npx prisma migrate deploy```
+4. Seed the database ```npm run seed```
+5. Webserver available at ```localhost:3000```
 
 ### Tests
 - Unit tests: ```npm run test```
