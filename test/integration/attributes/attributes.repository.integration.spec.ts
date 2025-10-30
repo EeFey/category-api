@@ -12,7 +12,7 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
   let attributesRepository: AttributesRepository;
   let moduleFixture: TestingModule;
   let app: INestApplication;
-  let electronics: Category, phones: Category, laptops: Category;
+  let electronics: Category, phones: Category, laptops: Category, gamingLaptops: Category;
 
   beforeAll(async () => {
     const setup = await setupIntegrationTest([AttributesModule]);
@@ -21,10 +21,11 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     prisma = setup.prismaService;
     attributesRepository = moduleFixture.get(AttributesRepository);
 
-    [electronics, laptops, phones] = await Promise.all([
+    [electronics, laptops, phones, gamingLaptops] = await Promise.all([
       prisma.category.findUniqueOrThrow({ where: { key: 'electronics' } }),
       prisma.category.findUniqueOrThrow({ where: { key: 'laptops' } }),
       prisma.category.findUniqueOrThrow({ where: { key: 'mobile_phones' } }),
+      prisma.category.findUniqueOrThrow({ where: { key: 'gaming_laptops' } }),
     ]);
   });
 
@@ -220,6 +221,28 @@ describe('AttributesRepository.queryAttributesByCategoryIds (integration)', () =
     const res = await attributesRepository.queryAttributesByCategoryIds(dto);
     expect(res.rows).toHaveLength(0);
     expect(res.total).toBeGreaterThan(0);
+  });
+
+  it('should prioritize direct linkType correctly based on category combination', async () => {
+    const dtoGamingLaptops: GetAttributesDto = {
+      categoryIds: [gamingLaptops.id],
+      page: 1,
+      limit: 50,
+    };
+
+    const resGamingLaptops = await attributesRepository.queryAttributesByCategoryIds(dtoGamingLaptops);
+    expect(resGamingLaptops.rows.find((r) => r.key === 'cpu_model')?.linkType).toBe('inherited');
+    expect(resGamingLaptops.rows.find((r) => r.key === 'gpu_model')?.linkType).toBe('direct');
+
+    const dtoCombined: GetAttributesDto = {
+      categoryIds: [laptops.id, gamingLaptops.id],
+      page: 1,
+      limit: 50,
+    };
+
+    const resCombined = await attributesRepository.queryAttributesByCategoryIds(dtoCombined);
+    expect(resCombined.rows.find((r) => r.key === 'cpu_model')?.linkType).toBe('direct');
+    expect(resCombined.rows.find((r) => r.key === 'gpu_model')?.linkType).toBe('direct');
   });
 });
 
